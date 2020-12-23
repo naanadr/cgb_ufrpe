@@ -53,3 +53,10 @@ def extract_triangles(malha3d, lines):
 
         triangle = Triangle(index_x=values[0], index_y=values[1], index_z=values[2])
         malha3d.add_triangle(triangle)
+
+
+def enrich_triangles(malha3d):
+    for triangle in malha3d.triangles:
+        triangle.x = malha3d.vertices[triangle.index_x]
+        triangle.y = malha3d.vertices[triangle.index_y]
+        triangle.z = malha3d.vertices[triangle.index_z]

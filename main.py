@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 from utils import (
     build_malha3d,
+    enrich_triangles,
     extract_triangles,
     extract_vertices,
     read_file,
@@ -26,6 +27,7 @@ def main():
 
     extract_vertices(malha3d=malha3d, lines=lines[1 : malha3d.qtd_vertices + 1])
     extract_triangles(malha3d=malha3d, lines=lines[malha3d.qtd_vertices + 1 :])
+    enrich_triangles(malha3d=malha3d)
 
 
 if __name__ == "__main__":
