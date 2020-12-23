@@ -1,3 +1,7 @@
+from os import getenv
+
+from dotenv import load_dotenv
+
 from utils.malha3d import Malha3D
 from utils.triangle import Triangle
 from utils.vertex import Vertex
@@ -9,6 +13,20 @@ def read_file(file_name):
         lines = list(map(lambda line: line.replace("\n", ""), lines))
 
         return lines
+
+
+def read_config_file(file_name):
+    load_dotenv(file_name)
+    cam_config = {
+        "N": eval(getenv("N")),
+        "V": eval(getenv("V")),
+        "d": eval(getenv("d")),
+        "hx": eval(getenv("hx")),
+        "hy": eval(getenv("hy")),
+        "C": eval(getenv("C")),
+    }
+
+    return cam_config
 
 
 def build_malha3d(file_name, line):
