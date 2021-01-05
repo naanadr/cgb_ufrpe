@@ -27,3 +27,6 @@ class Vertex:
     @z.setter
     def z(self, value):
         self.__z = float(value)
+
+    def get(self):
+        return [self.x, self.y, self.z]
