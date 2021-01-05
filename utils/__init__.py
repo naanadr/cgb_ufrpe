@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from utils.malha3d import Malha3D
 from utils.triangle import Triangle
 from utils.vertex import Vertex
+from utils.preprocess import convert_coord
 
 
 def read_file(file_name):
@@ -55,8 +56,10 @@ def extract_triangles(malha3d, lines):
         malha3d.add_triangle(triangle)
 
 
-def enrich_triangles(malha3d):
+def enrich_triangles(malha3d, **kwargs):
     for triangle in malha3d.triangles:
-        triangle.x = malha3d.vertices[triangle.index_x]
-        triangle.y = malha3d.vertices[triangle.index_y]
-        triangle.z = malha3d.vertices[triangle.index_z]
+        triangle.vector = [
+            convert_coord(P=malha3d.vertices[triangle.index_x].get(), **kwargs),
+            convert_coord(P=malha3d.vertices[triangle.index_y].get(), **kwargs),
+            convert_coord(P=malha3d.vertices[triangle.index_z].get(), **kwargs),
+        ]
