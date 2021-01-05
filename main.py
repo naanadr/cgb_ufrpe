@@ -7,14 +7,22 @@ from utils import (
     enrich_triangles,
     extract_triangles,
     extract_vertices,
-    read_file,
     read_config_file,
+    read_file,
 )
+from utils.preprocess import matrix_change_base
+
+RES_X = 100
+RES_Y = 100
 
 
 def main():
-    objects_3d = getenv("OBJECTS_3D")
     cam_config = read_config_file(getenv("CONFIG_FILE"))
+    matrix = matrix_change_base(
+        V=list(cam_config.get("V")), N=list(cam_config.get("N"))
+    )
+
+    objects_3d = getenv("OBJECTS_3D")
 
     # TODO: Receber do usuário o nome do arquivo que será lido
     files = listdir(objects_3d)
@@ -27,7 +35,13 @@ def main():
 
     extract_vertices(malha3d=malha3d, lines=lines[1 : malha3d.qtd_vertices + 1])
     extract_triangles(malha3d=malha3d, lines=lines[malha3d.qtd_vertices + 1 :])
-    enrich_triangles(malha3d=malha3d)
+    enrich_triangles(
+        malha3d=malha3d,
+        config=cam_config,
+        matrix_change_base=matrix,
+        res_x=RES_X,
+        res_y=RES_Y,
+    )
 
 
 if __name__ == "__main__":
