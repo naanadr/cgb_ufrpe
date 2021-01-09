@@ -48,7 +48,7 @@ def convert_coord(P, config, matrix_change_base, res_x, res_y):
     """
     cood_vista = np.dot(matrix_change_base, np.subtract(P, config.get("C")))
     cood_tela = [
-        (config.get("d") / config.get("hx")) * (cood_vista[0] / cood_vista[1]),
+        (config.get("d") / config.get("hx")) * (cood_vista[0] / cood_vista[2]),
         (config.get("d") / config.get("hy")) * (cood_vista[1] / cood_vista[2]),
     ]
 
