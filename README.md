@@ -35,11 +35,18 @@ hy = 2
 C = 0 -500 500
 ```
 
+![parametros](docs/parametros.png)
+
+> hx, hy: escalares que determinam o retângulo de vista.
+> C: ponto de foco
+> d: escalar que define distância do foco ao plano de vista
+> U, V, N : base ortonormal que determina sistema de coordenadas de vista
+
+
 O usuário deve ser capaz de alterar os valores dos parâmetros no arquivo de texto, recarregá-los e redesenhar o objeto sem precisar fechar a aplicação e abri-la novamente (ex: o usuário pode pressionar uma tecla específica para recarregar os parâmetros a partir do arquivo de texto e redesenhar o objeto).
 
 Deve-se converter os vértices do objeto de coordenadas mundiais para coordenadas de vista, realizar a projeção em perspectiva, converter para coordenadas normalizadas e por fim para coordenadas de tela. Após isso, deve-se utilizar o algoritmo de rasterização de polígonos scan line conversion (varredura) para preencher os triângulos projetados. Os pixels da tela correspondentes aos triângulos projetados e preenchidos devem ser pintados de branco, enquanto que os demais pixels devem ser pintados de preto.
 
 A única função gráfica que pode ser utilizada é a que desenha um pixel colorido na tela. Apenas as bibliotecas padrão da linguagem escolhida podem ser usadas.
 
-OBS.: caso desejado, é permitido usar uma biblioteca externa que ofereça a função de pintar
-um pixel colorido na tela.
+OBS.: caso desejado, é permitido usar uma biblioteca externa que ofereça a função de pintar um pixel colorido na tela.
