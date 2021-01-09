@@ -1,6 +1,5 @@
 class Malha3D:
-    def __init__(self, file_origin, qtd_vertices, qtd_triangles):
-        self.file_origin = file_origin
+    def __init__(self, qtd_vertices, qtd_triangles):
         self.qtd_vertices = qtd_vertices
         self.qtd_triangles = qtd_triangles
         self.vertices = []
