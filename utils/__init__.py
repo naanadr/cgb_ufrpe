@@ -17,7 +17,7 @@ def read_file(file_name):
 
 
 def read_config_file(file_name):
-    load_dotenv(file_name)
+    load_dotenv(file_name, override=True)
     cam_config = {
         "N": eval(getenv("N")),
         "V": eval(getenv("V")),
