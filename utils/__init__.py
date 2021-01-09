@@ -30,12 +30,10 @@ def read_config_file(file_name):
     return cam_config
 
 
-def build_malha3d(file_name, line):
+def build_malha3d(line):
     values = line.split(" ")
 
-    malha3d = Malha3D(
-        file_origin=file_name, qtd_vertices=values[0], qtd_triangles=values[1]
-    )
+    malha3d = Malha3D(qtd_vertices=values[0], qtd_triangles=values[1])
 
     return malha3d
 
