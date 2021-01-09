@@ -11,7 +11,7 @@ class Triangle:
 
     @index_x.setter
     def index_x(self, value):
-        self.__index_x = int(value)
+        self.__index_x = int(value) - 1
 
     @property
     def index_y(self):
@@ -19,7 +19,7 @@ class Triangle:
 
     @index_y.setter
     def index_y(self, value):
-        self.__index_y = int(value)
+        self.__index_y = int(value) - 1
 
     @property
     def index_z(self):
@@ -27,4 +27,4 @@ class Triangle:
 
     @index_z.setter
     def index_z(self, value):
-        self.__index_z = int(value)
+        self.__index_z = int(value) - 1
