@@ -1,5 +1,7 @@
 from os import getenv, listdir
 
+import cv2
+import numpy as np
 from dotenv import load_dotenv
 
 from utils import (
@@ -12,36 +14,78 @@ from utils import (
 )
 from utils.preprocess import matrix_change_base
 
-RES_X = 100
-RES_Y = 100
+RES_X = 512
+RES_Y = 512
 
 
 def main():
+    print("## PROJETO 1 V.A. CGB UFRPE 2020.4 ##")
+
+    run()
+    load = True
+    while load:
+        reload = input(
+            "\nVocê deseja recarregar a figura com novos parâmetros? (1 - Sim, 0 - Não)  "
+        )
+        print("\n")
+        if reload == "1":
+            run()
+        elif reload == "0":
+            break
+        else:
+            print("Opção não válida, tente novamente!")
+
+
+def find_file():
+    objects_3d = getenv("OBJECTS_3D")
+    file = list(filter(lambda x: ".byu" in x, listdir(objects_3d)))[0]
+    print(f"Arquivo utilizado: {file}")
+
+    return objects_3d + file
+
+
+def run():
     cam_config = read_config_file(getenv("CONFIG_FILE"))
+    print(f"Configurações utilizadas: {cam_config}")
     matrix = matrix_change_base(
         V=list(cam_config.get("V")), N=list(cam_config.get("N"))
     )
 
-    objects_3d = getenv("OBJECTS_3D")
+    lines = read_file(find_file())
+    malha3d = build_malha3d(line=lines[0])
+    build_triangles(
+        malha3d=malha3d,
+        lines=lines,
+        cam_config=cam_config,
+        matrix_change_base=matrix,
+    )
 
-    # TODO: Receber do usuário o nome do arquivo que será lido
-    files = listdir(objects_3d)
-    file = files[0]
-    file_name = objects_3d + file
+    show_object(malha3d)
 
-    lines = read_file(file_name)
 
-    malha3d = build_malha3d(file_name=file_name, line=lines[0])
-
+def build_triangles(malha3d, lines, cam_config, matrix_change_base):
     extract_vertices(malha3d=malha3d, lines=lines[1 : malha3d.qtd_vertices + 1])
     extract_triangles(malha3d=malha3d, lines=lines[malha3d.qtd_vertices + 1 :])
     enrich_triangles(
         malha3d=malha3d,
         config=cam_config,
-        matrix_change_base=matrix,
+        matrix_change_base=matrix_change_base,
         res_x=RES_X,
         res_y=RES_Y,
     )
+
+
+def show_object(malha3d):
+    img = np.zeros((RES_X, RES_Y, 3), np.uint8)
+    for triangle in malha3d.triangles:
+        pts = np.array(triangle.vector, np.int32)
+        pts = pts.reshape((-1, 1, 2))
+        cv2.polylines(img, [pts], True, (255, 255, 255))
+
+    print("\nPressione qualquer tecla para sair!")
+    cv2.imshow("image", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
