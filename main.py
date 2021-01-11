@@ -13,6 +13,7 @@ from utils import (
     read_file,
 )
 from utils.preprocess import matrix_change_base
+from utils.rasterization import bresenhan_function
 
 RES_X = 512
 RES_Y = 512
@@ -59,8 +60,9 @@ def run():
         cam_config=cam_config,
         matrix_change_base=matrix,
     )
-
-    show_object(malha3d)
+    # show_object_correct(malha3d)
+    img = draw_object(malha3d)
+    show_object(img)
 
 
 def build_triangles(malha3d, lines, cam_config, matrix_change_base):
@@ -75,13 +77,36 @@ def build_triangles(malha3d, lines, cam_config, matrix_change_base):
     )
 
 
-def show_object(malha3d):
+def draw_object(malha3d):
+    img = np.zeros((RES_X, RES_Y, 3), np.uint8)
+    for triangle in malha3d.triangles:
+        triangle.vector.sort(key=lambda x: x[1])
+
+        points = []
+        for i in range(0, len(triangle.vector) - 1):
+            points.append((triangle.vector[i], triangle.vector[i + 1]))
+        points.append((triangle.vector[0], triangle.vector[-1]))
+
+        for point in points:
+            img = bresenhan_function(img=img, p0=point[0], p1=point[1])
+
+    return img
+
+
+def show_object_correct(malha3d):
     img = np.zeros((RES_X, RES_Y, 3), np.uint8)
     for triangle in malha3d.triangles:
         pts = np.array(triangle.vector, np.int32)
         pts = pts.reshape((-1, 1, 2))
         cv2.polylines(img, [pts], True, (255, 255, 255))
 
+    print("\nPressione qualquer tecla para sair!")
+    cv2.imshow("image", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+def show_object(img):
     print("\nPressione qualquer tecla para sair!")
     cv2.imshow("image", img)
     cv2.waitKey(0)
