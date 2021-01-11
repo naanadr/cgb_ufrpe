@@ -1,5 +1,7 @@
 """
-    Implementação baseada em https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+    Implementação baseada no pseudocódigo descrito no artigo
+    https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+    que engloba todos os casos.
 """
 import cv2
 
