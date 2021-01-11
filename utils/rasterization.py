@@ -11,8 +11,6 @@ def bresenhan_function(img, p0, p1):
     x1, y1 = p1
     plotLine(img, x0, y0, x1, y1)
 
-    return img
-
 
 def plotLine(img, x0, y0, x1, y1):
     if abs(y1 - y0) < abs(x1 - x0):

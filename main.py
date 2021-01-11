@@ -61,7 +61,8 @@ def run():
         matrix_change_base=matrix,
     )
 
-    img = draw_object(malha3d)
+    img = np.zeros((RES_X, RES_Y, 3), np.uint8)
+    draw_object(img, malha3d)
     show_object(img)
 
 
@@ -77,8 +78,7 @@ def build_triangles(malha3d, lines, cam_config, matrix_change_base):
     )
 
 
-def draw_object(malha3d):
-    img = np.zeros((RES_X, RES_Y, 3), np.uint8)
+def draw_object(img, malha3d):
     for triangle in malha3d.triangles:
         triangle.vector.sort(key=lambda x: x[1])
 
@@ -88,9 +88,7 @@ def draw_object(malha3d):
         points.append((triangle.vector[0], triangle.vector[-1]))
 
         for point in points:
-            img = bresenhan_function(img=img, p0=point[0], p1=point[1])
-
-    return img
+            bresenhan_function(img=img, p0=point[0], p1=point[1])
 
 
 def show_object(img):
