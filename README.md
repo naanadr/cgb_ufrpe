@@ -98,4 +98,4 @@ hx=2
 hy=2
 C=(0,700,-500)
 
-Caso você deseje, você pode alterar o arquivo de configuração `config-camera.env` sem encerrar o programa. Para isso, com a janela da figura de saida em foco, precione qualquer tecla. Após isso, você verá no terminal a seguinte mensagem: `Você deseja recarregar a figura com novos parâmetros? (1 - Sim, 0 - Não)`. Altere o arquivo `config-camera.env` com novos valores, digite `1` no terminal e precione `enter`. Pronto! Será carregado a figura com novos valores de configuração. Para sair do programa, é só digitar `0` quando a mensagem aparecer novamente.
+Caso você deseje, você pode alterar o **arquivo de configuração `config-camera.env` sem encerrar o programa**. Para isso, com a janela da figura de saida em foco, pressione qualquer tecla. Após isso, você verá no terminal a seguinte mensagem: `Você deseja recarregar a figura com novos parâmetros? (1 - Sim, 0 - Não)`. Altere o arquivo `config-camera.env` com novos valores, digite `1` no terminal e pressione `enter`. Pronto! Será carregado a figura com novos valores de configuração. Para sair do programa, é só digitar `0` quando a mensagem aparecer novamente.
