@@ -5,8 +5,8 @@ Projeto da disciplina de Computação Gráfica Básica ministrada na UFRPE no se
 
 ## Índice
 
-1. [Especificação do Projeto](#especificacao-do-projeto)
-2. [Instalação](#instalacao)
+1. [Especificação do Projeto](#especificação-do-projeto)
+2. [Instalação](#instalação)
 3. [Como executar o projeto](#como-executar-o-projeto)
 
 ## Especificação do Projeto
