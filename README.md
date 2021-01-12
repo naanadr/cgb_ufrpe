@@ -1,6 +1,12 @@
 # cgb_ufrpe
 Projeto da disciplina de Computação Gráfica Básica ministrada na UFRPE
 
+## Índice
+
+1. [Especificação do Projeto](#especificacao-do-projeto)
+2. [Instalação](#instalacao)
+3. [Como executar o projeto](#como-executar-o-projeto)
+
 ## Especificação do Projeto
 
 Carregar na memória uma malha de triângulos referente a um objeto 3D armazenada em arquivo de texto e desenhar seus vértices na tela. O arquivo utilizado para armazenar uma malha com **n vértices** e **k triângulos** possui o seguinte formato:
@@ -50,3 +56,7 @@ Deve-se converter os vértices do objeto de coordenadas mundiais para coordenada
 A única função gráfica que pode ser utilizada é a que desenha um pixel colorido na tela. Apenas as bibliotecas padrão da linguagem escolhida podem ser usadas.
 
 OBS.: caso desejado, é permitido usar uma biblioteca externa que ofereça a função de pintar um pixel colorido na tela.
+
+## Instalação
+
+## Como executar o projeto
