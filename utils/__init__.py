@@ -1,5 +1,6 @@
 from os import getenv
 
+import cv2
 from dotenv import load_dotenv
 
 from utils.malha3d import Malha3D
@@ -61,3 +62,7 @@ def enrich_triangles(malha3d, **kwargs):
             convert_coord(P=malha3d.vertices[triangle.index_y].get(), **kwargs),
             convert_coord(P=malha3d.vertices[triangle.index_z].get(), **kwargs),
         ]
+
+
+def draw(img, point):
+    cv2.circle(img, point, 0, (255, 255, 255), -1)
