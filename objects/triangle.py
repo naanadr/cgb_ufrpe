@@ -4,6 +4,7 @@ class Triangle:
         self.index_y = index_y
         self.index_z = index_z
         self.vector = None
+        self.normal = None
 
     @property
     def index_x(self):
