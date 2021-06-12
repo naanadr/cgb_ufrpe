@@ -79,7 +79,7 @@ Para executar o projeto você precisará verificar alguns pontos:
 2. As configurações de câmera foram informadas corretamente no arquivo `config-camera.env`?
 3. A malha 3D desejada está no diretório `figure/` ?
 
-> No diretório `objects/` você encontra 7 arquivos contendo malhas 3D válidas. E o arquivo `.env` não precisa ser alterado, apenas se você alterar as variáveis padrões do projeto.
+> No diretório `files/` você encontra 7 arquivos contendo malhas 3D válidas. E o arquivo `.env` não precisa ser alterado, apenas se você alterar as variáveis padrões do projeto.
 
 Após esses passos serem conferidos, você irá executar no terminal o comando:
 
