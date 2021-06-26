@@ -81,6 +81,9 @@ def enrich_triangles(malha3d, **kwargs):
         point_y = malha3d.vertices[triangle.index_y].get()
         point_z = malha3d.vertices[triangle.index_z].get()
 
+        triangle.normal = find_normal(
+            point_x, point_y, point_z, kwargs["config"], kwargs["base_ortonormal"]
+        )
         triangle.vector = [
             convert_coord(P=point_x, **kwargs),
             convert_coord(P=point_y, **kwargs),
