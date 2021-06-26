@@ -80,9 +80,22 @@ def convert_coord(P, config, base_ortonormal, res_x, res_y):
     return coord_tela
 
 
-def find_normal(point_x, point_y, point_z):
-    v1 = np.subtract(point_y, point_x)
-    v2 = np.subtract(point_z, point_x)
-    norm = np.cross(v1, v2)
+def find_normal(value1, value2, value3, config, base_ortonormal):
+    """
+    Calcula a normal de uma superfice a partir de três valores e normaliza esse
+    resultado.
 
-    return _normalizar(norm)
+    1 - Se for um triangulo, utilizar as três vertices;
+    1.1 - Calcular o produto vetorial de v2 - v1 e v3 - v1
+    1.2 - Utilizar a regra da mão esquerda, para fazer o produto vetorial
+    1.3 - Normalizar o vetor resultante
+    """
+    value1 = _coord_vista(value1, config, base_ortonormal)
+    value2 = _coord_vista(value2, config, base_ortonormal)
+    value3 = _coord_vista(value3, config, base_ortonormal)
+
+    v1 = np.subtract(value2, value1)
+    v2 = np.subtract(value3, value1)
+    prod_vetorial = np.cross(v1, v2)
+
+    return _normalizar(prod_vetorial)
