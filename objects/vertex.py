@@ -3,6 +3,8 @@ class Vertex:
         self.x = x
         self.y = y
         self.z = z
+        self.triangles = []
+        self.normal = None
 
     @property
     def x(self):
