@@ -4,23 +4,23 @@ import cv2
 import numpy as np
 from dotenv import load_dotenv
 
+from objects.z_buffer import Malha_ZBuffer
 from utils import (
     build_malha3d,
+    draw,
     enrich_triangles,
+    enrich_vertices,
+    find_pixels,
     read_config_file,
     read_file,
 )
-from utils.math_ops import base_ortonormal
-from utils.bresenhan import find_points
-from utils.scanline import fill_poly
+from utils.math_ops import base_ortonormal, find_p_original
 
 RES_X = 512
 RES_Y = 512
 
 
 def main():
-    print("## PROJETO 1 V.A. CGB UFRPE ##")
-
     run()
     load = True
     while load:
@@ -40,6 +40,7 @@ def run():
     # Carrega os padrões de câmera
     cam_config = read_config_file(getenv("CONFIG_FILE"))
     print(f"Configurações utilizadas: {cam_config}")
+    zbuffer_malha = Malha_ZBuffer(RES_X, RES_Y)
     base = base_ortonormal(V=list(cam_config.get("V")), N=list(cam_config.get("N")))
 
     # Constroi a Malha3D com os valores dos vertices e triangulos
@@ -55,6 +56,10 @@ def run():
         res_x=RES_X,
         res_y=RES_Y,
     )
+    # Adiciona as normais aos vertices que compõe essa malha 3d
+    enrich_vertices(malha3d=malha3d)
+
+    malha3d.sort_triangles()
 
     img = np.zeros((RES_X, RES_Y, 3), np.uint8)
     draw_object(img, malha3d)
@@ -71,18 +76,19 @@ def find_file():
 
 def draw_object(img, malha3d):
     for triangle in malha3d.triangles:
-        coords = []
-        triangle.vector.sort(key=lambda x: x[1])
+        pixels = find_pixels(triangle)
+        pixels_original = []
+        # Valor dos pixels no R3
+        for pixel in pixels:
+            pixels_original.append(
+                find_p_original(
+                    pixel, triangle.vertices_coord_tela, triangle.vertices_coord_vista
+                )
+            )
+            draw(img, pixel)
 
-        points = []
-        for i in range(0, len(triangle.vector) - 1):
-            points.append((triangle.vector[i], triangle.vector[i + 1]))
-        points.append((triangle.vector[0], triangle.vector[-1]))
-
-        for point in points:
-            coords.append(find_points(p0=point[0], p1=point[1]))
-
-        fill_poly(img=img, points=triangle.vector, sides=points, coords=coords)
+        # Valor do ponto no R2 e no R3
+        triangle.inside_points = zip(pixels, pixels_original)
 
 
 def show_object(img):
