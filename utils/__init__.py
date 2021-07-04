@@ -235,9 +235,9 @@ def enrich_points(malha3d, zbuffer_malha, config):
         for pixel in all_pixels:
             if (
                 (pixel[0] < 0)
-                or (pixel[0] > res_x)
+                or (pixel[0] >= res_x)
                 or (pixel[1] < 0)
-                or (pixel[1] > res_y)
+                or (pixel[1] >= res_y)
             ):
                 continue
 
