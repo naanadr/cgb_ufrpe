@@ -3,3 +3,4 @@ class Point:
         self.pixel = pixel
         self.coord_baricentrica = coord_baricentrica
         self.p_original = coord_original
+        self.normal = None
