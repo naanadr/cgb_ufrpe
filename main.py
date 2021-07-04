@@ -16,8 +16,8 @@ from utils import (
 )
 from utils.math_ops import base_ortonormal
 
-RES_X = 512
-RES_Y = 512
+RES_X = 500
+RES_Y = 500
 
 
 def main():
@@ -39,6 +39,8 @@ def main():
 def run():
     # Carrega os padrões de câmera
     cam_config = read_config_file(getenv("CONFIG_FILE"))
+    cam_config["RES_X"] = RES_X
+    cam_config["RES_Y"] = RES_Y
     print(f"Configurações utilizadas: {cam_config}")
     base = base_ortonormal(V=list(cam_config.get("V")), N=list(cam_config.get("N")))
 
@@ -60,10 +62,10 @@ def run():
     malha3d.sort_triangles()
 
     zbuffer_malha = Malha_ZBuffer(RES_X, RES_Y)
-    enrich_points(malha3d=malha3d, zbuffer_malha=zbuffer_malha)
+    enrich_points(malha3d=malha3d, zbuffer_malha=zbuffer_malha, config=cam_config)
 
     img = np.zeros((RES_X, RES_Y, 3), np.uint8)
-    draw_object(img, malha3d)
+    draw_object(img, zbuffer_malha.matriz)
     show_object(img)
 
 
@@ -75,10 +77,11 @@ def find_file():
     return dir_files_objects_3d + file
 
 
-def draw_object(img, malha3d):
-    for triangle in malha3d.triangles:
-        for point in triangle.inside_points:
-            draw(img, point.pixel)
+def draw_object(img, zbuffer_malha):
+    for linha in range(len(zbuffer_malha)):
+        for coluna in range(len(zbuffer_malha[linha])):
+            element = zbuffer_malha[linha][coluna]
+            draw(img, (linha, coluna), element.cor)
 
 
 def show_object(img):
