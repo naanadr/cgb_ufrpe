@@ -39,6 +39,14 @@ def read_config_file(file_name):
         "hx": eval(getenv("hx")),
         "hy": eval(getenv("hy")),
         "C": eval(getenv("C")),
+        "Ka": eval(getenv("Ka")),
+        "Iamb": eval(getenv("Iamb")),
+        "Kd": eval(getenv("Kd")),
+        "Od": eval(getenv("Od")),
+        "Il": eval(getenv("Il")),
+        "Ks": eval(getenv("Ks")),
+        "n": eval(getenv("n")),
+        "Pl": eval(getenv("Pl")),
     }
 
     return cam_config
@@ -194,8 +202,10 @@ def _find_pixels(vertices_coord_tela, sort_vertices_coord_tela):
 
 def _update_zbuffer_malha(malha, point):
     x, y = point.pixel
-    if malha.matriz[x][y].profundidade > point.p_original[2]:
-        pass
+    element_in_malha = malha.matriz[x][y]
+    if element_in_malha.profundidade > point.p_original[2]:
+        element_in_malha.profundidade = point.p_original[2]
+        element_in_malha.ponto = point
 
 
 def enrich_points(malha3d, zbuffer_malha):
