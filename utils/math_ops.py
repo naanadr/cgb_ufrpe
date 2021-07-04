@@ -1,4 +1,4 @@
-from math import floor, sqrt
+from math import floor, pow, sqrt
 
 import numpy as np
 
@@ -146,3 +146,49 @@ def find_p_original(coordenada_barizentrica, coordenadas_vista):
         np.sum([alfa * vertice_a[1], beta * vertice_b[1], gama * vertice_c[1]]),
         np.sum([alfa * vertice_a[2], beta * vertice_b[2], gama * vertice_c[2]]),
     ]
+
+
+def _find_v_vector(ponto):
+    return _normalizar(np.subtract([0, 0, 0], ponto))
+
+
+def _find_l_vector(pl, ponto):
+    return _normalizar(np.subtract(pl, ponto))
+
+
+def _find_r_vector(N, L):
+    prod_n_l = 2 * np.dot(N, L)
+    return np.subtract(np.dot(N, prod_n_l), L)
+
+
+def find_cor(ponto, config):
+    N = ponto.normal
+    V = _find_v_vector(ponto.p_original)
+    L = _find_l_vector(config.get("Pl"), ponto.p_original)
+    R = _find_r_vector(N, L)
+
+    Ia = np.dot(config.get("Iamb"), config.get("Ka"))
+    Id = None
+    Is = None
+
+    if np.dot(N, L) < 0:  # Fonte de luz está obosta a normal.
+        if np.dot(N, V) < 0:  # A camera está do mesmo lado da luz
+            N = -N
+        else:
+            Is = (0, 0, 0)
+            Id = (0, 0, 0)
+    if np.dot(V, R) < 0:  # A camera está distante do cone de iluminação.
+        Is = (0, 0, 0)
+
+    if Id is None:
+        Id = np.dot(np.dot(N, L), config.get("Kd"))
+        Id = np.multiply(Id, config.get("Od"))
+        Id = np.multiply(Id, config.get("Il"))
+    if Is is None:
+        Is = np.dot(
+            config.get("Il"), pow(np.dot(R, V), config.get("n")) * config.get("Ks")
+        )
+
+    I_final = np.sum([Ia, Is, Id], axis=0)
+    I_final = [round(v) for v in I_final]
+    return tuple([255 if v > 255 else v for v in I_final])
