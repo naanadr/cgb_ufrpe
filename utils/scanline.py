@@ -8,11 +8,6 @@ def fill_poly(points, sides, coords):
     side_3.sort(key=lambda x: x[1])
 
     inside_points = []
-    # Pinta os pixels da borda
-    for side in coords:
-        for coord in side:
-            inside_points.append(coord)
-
     inside_points.extend(_run_sides(side_1, side_3))
 
     if side_2[-1] == side_3[0]:
@@ -28,6 +23,9 @@ def _run_sides(side_1, side_2):
 
     for sideA in side_1:
         for sideB in side_2:
+            if sideA == sideB:
+                continue
+
             x0, y0 = sideA
             x1, y1 = sideB
 
