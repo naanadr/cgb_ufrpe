@@ -8,13 +8,13 @@ from objects.z_buffer import Malha_ZBuffer
 from utils import (
     build_malha3d,
     draw,
+    enrich_points,
     enrich_triangles,
     enrich_vertices,
-    find_pixels,
     read_config_file,
     read_file,
 )
-from utils.math_ops import base_ortonormal, find_p_original
+from utils.math_ops import base_ortonormal
 
 RES_X = 512
 RES_Y = 512
@@ -40,7 +40,6 @@ def run():
     # Carrega os padrões de câmera
     cam_config = read_config_file(getenv("CONFIG_FILE"))
     print(f"Configurações utilizadas: {cam_config}")
-    zbuffer_malha = Malha_ZBuffer(RES_X, RES_Y)
     base = base_ortonormal(V=list(cam_config.get("V")), N=list(cam_config.get("N")))
 
     # Constroi a Malha3D com os valores dos vertices e triangulos
@@ -58,8 +57,10 @@ def run():
     )
     # Adiciona as normais aos vertices que compõe essa malha 3d
     enrich_vertices(malha3d=malha3d)
-
     malha3d.sort_triangles()
+
+    zbuffer_malha = Malha_ZBuffer(RES_X, RES_Y)
+    enrich_points(malha3d=malha3d, zbuffer_malha=zbuffer_malha)
 
     img = np.zeros((RES_X, RES_Y, 3), np.uint8)
     draw_object(img, malha3d)
@@ -76,19 +77,8 @@ def find_file():
 
 def draw_object(img, malha3d):
     for triangle in malha3d.triangles:
-        pixels = find_pixels(triangle)
-        pixels_original = []
-        # Valor dos pixels no R3
-        for pixel in pixels:
-            pixels_original.append(
-                find_p_original(
-                    pixel, triangle.vertices_coord_tela, triangle.vertices_coord_vista
-                )
-            )
-            draw(img, pixel)
-
-        # Valor do ponto no R2 e no R3
-        triangle.inside_points = zip(pixels, pixels_original)
+        for point in triangle.inside_points:
+            draw(img, point.pixel)
 
 
 def show_object(img):
