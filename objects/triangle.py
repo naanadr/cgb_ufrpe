@@ -3,7 +3,12 @@ class Triangle:
         self.index_x = index_x
         self.index_y = index_y
         self.index_z = index_z
-        self.vector = None
+        self.vertices_coord_vista = None
+        self.vertices_coord_tela = None
+        self.original_vertices = None
+        self.normal = None
+        self.baricentro = None
+        self.inside_points = None
 
     @property
     def index_x(self):

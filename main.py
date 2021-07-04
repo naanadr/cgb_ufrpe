@@ -4,25 +4,23 @@ import cv2
 import numpy as np
 from dotenv import load_dotenv
 
+from objects.z_buffer import Malha_ZBuffer
 from utils import (
     build_malha3d,
+    draw,
+    enrich_points,
     enrich_triangles,
-    extract_triangles,
-    extract_vertices,
+    enrich_vertices,
     read_config_file,
     read_file,
 )
-from utils.preprocess import matrix_change_base
-from utils.bresenhan import find_points
-from utils.scanline import fill_poly
+from utils.math_ops import base_ortonormal
 
-RES_X = 512
-RES_Y = 512
+RES_X = 500
+RES_Y = 500
 
 
 def main():
-    print("## PROJETO 1 V.A. CGB UFRPE 2020.4 ##")
-
     run()
     load = True
     while load:
@@ -39,60 +37,51 @@ def main():
 
 
 def run():
+    # Carrega os padrões de câmera
     cam_config = read_config_file(getenv("CONFIG_FILE"))
+    cam_config["RES_X"] = RES_X
+    cam_config["RES_Y"] = RES_Y
     print(f"Configurações utilizadas: {cam_config}")
-    matrix = matrix_change_base(
-        V=list(cam_config.get("V")), N=list(cam_config.get("N"))
-    )
+    base = base_ortonormal(V=list(cam_config.get("V")), N=list(cam_config.get("N")))
 
-    lines = read_file(find_file())
-    malha3d = build_malha3d(line=lines[0])
-    build_triangles(
+    # Constroi a Malha3D com os valores dos vertices e triangulos
+    lines = read_file(file_name=find_file())
+    malha3d = build_malha3d(lines=lines)
+
+    # Faz todas as operações necessárias para que o triangulo esteja pronto
+    # para ser pintado e mostrado na tela
+    enrich_triangles(
         malha3d=malha3d,
-        lines=lines,
-        cam_config=cam_config,
-        matrix_change_base=matrix,
+        config=cam_config,
+        base_ortonormal=base,
+        res_x=RES_X,
+        res_y=RES_Y,
     )
+    # Adiciona as normais aos vertices que compõe essa malha 3d
+    enrich_vertices(malha3d=malha3d)
+    malha3d.sort_triangles()
+
+    zbuffer_malha = Malha_ZBuffer(RES_X, RES_Y)
+    enrich_points(malha3d=malha3d, zbuffer_malha=zbuffer_malha, config=cam_config)
 
     img = np.zeros((RES_X, RES_Y, 3), np.uint8)
-    draw_object(img, malha3d)
+    draw_object(img, zbuffer_malha.matriz)
     show_object(img)
 
 
 def find_file():
-    objects_3d = getenv("OBJECTS_3D")
-    file = list(filter(lambda x: ".byu" in x, listdir(objects_3d)))[0]
+    dir_files_objects_3d = getenv("DIR_FILES_OBJECTS_3D")
+    file = list(filter(lambda x: ".byu" in x, listdir(dir_files_objects_3d)))[0]
     print(f"Arquivo utilizado: {file}")
 
-    return objects_3d + file
+    return dir_files_objects_3d + file
 
 
-def build_triangles(malha3d, lines, cam_config, matrix_change_base):
-    extract_vertices(malha3d=malha3d, lines=lines[1 : malha3d.qtd_vertices + 1])
-    extract_triangles(malha3d=malha3d, lines=lines[malha3d.qtd_vertices + 1 :])
-    enrich_triangles(
-        malha3d=malha3d,
-        config=cam_config,
-        matrix_change_base=matrix_change_base,
-        res_x=RES_X,
-        res_y=RES_Y,
-    )
-
-
-def draw_object(img, malha3d):
-    for triangle in malha3d.triangles:
-        coords = []
-        triangle.vector.sort(key=lambda x: x[1])
-
-        points = []
-        for i in range(0, len(triangle.vector) - 1):
-            points.append((triangle.vector[i], triangle.vector[i + 1]))
-        points.append((triangle.vector[0], triangle.vector[-1]))
-
-        for point in points:
-            coords.append(find_points(p0=point[0], p1=point[1]))
-
-        fill_poly(img=img, points=triangle.vector, sides=points, coords=coords)
+def draw_object(img, zbuffer_malha):
+    for linha in range(len(zbuffer_malha)):
+        for coluna in range(len(zbuffer_malha[linha])):
+            element = zbuffer_malha[linha][coluna]
+            draw(img, (linha, coluna), element.cor)
 
 
 def show_object(img):

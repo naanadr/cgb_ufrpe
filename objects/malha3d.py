@@ -26,3 +26,8 @@ class Malha3D:
 
     def add_triangle(self, triangle):
         self.triangles.append(triangle)
+
+    def sort_triangles(self):
+        aux = [(t, t.baricentro) for t in self.triangles]
+        aux.sort(key=lambda x: x[1][2])
+        self.triangles = [t[0] for t in aux]
