@@ -2,18 +2,22 @@ import copy
 from os import getenv
 
 import cv2
+import numpy as np
 from dotenv import load_dotenv
 
 from objects.malha3d import Malha3D
+from objects.point import Point
 from objects.triangle import Triangle
 from objects.vertex import Vertex
 from utils.bresenhan import find_points
 from utils.math_ops import (
     coord_vista,
     coordenadas_tela,
+    find_baricentro_ponto,
     find_baricentro_triangulo,
     find_normal_triangle,
     find_normal_vertice,
+    find_p_original,
 )
 from utils.scanline import fill_poly
 
@@ -37,9 +41,6 @@ def read_config_file(file_name):
         "C": eval(getenv("C")),
     }
 
-    cam_config["d/hx"] = cam_config.get("d") / cam_config.get("hx")
-    cam_config["d/hy"] = cam_config.get("d") / cam_config.get("hy")
-
     return cam_config
 
 
@@ -57,6 +58,23 @@ def _extract_triangles(malha3d, lines):
 
         triangle = Triangle(index_x=values[0], index_y=values[1], index_z=values[2])
         malha3d.add_triangle(triangle)
+
+
+def _filter_triangle(triangle):
+    vertice_a, vertice_b, vertice_c = triangle.vertices_coord_tela
+    if vertice_a == vertice_b or vertice_a == vertice_c or vertice_b == vertice_c:
+        return False
+    else:
+        matriz = [
+            [vertice_a[0], vertice_a[1], 1],
+            [vertice_b[0], vertice_b[1], 1],
+            [vertice_c[0], vertice_c[1], 1],
+        ]
+        det = np.linalg.det(matriz)
+        if det == 0.0:
+            return False
+        else:
+            return True
 
 
 def build_malha3d(lines):
@@ -85,13 +103,11 @@ def enrich_triangles(malha3d, **kwargs):
     Além disso, encontra a normal de cada triangulo e insere o valor
     no atributo `normal`
     """
+    good_triangles = []
     for triangle in malha3d.triangles:
         vertice_x = malha3d.vertices[triangle.index_x]
-        vertice_x.triangles.append(triangle)
         vertice_y = malha3d.vertices[triangle.index_y]
-        vertice_y.triangles.append(triangle)
         vertice_z = malha3d.vertices[triangle.index_z]
-        vertice_z.triangles.append(triangle)
 
         triangle.vertices_coord_vista = [
             coord_vista(
@@ -130,10 +146,21 @@ def enrich_triangles(malha3d, **kwargs):
                 kwargs["res_y"],
             ),
         ]
-        triangle.normal = find_normal_triangle(triangle.vertices_coord_vista)
-        triangle.baricentro = find_baricentro_triangulo(
-            triangle.vertices_coord_vista, kwargs["config"], kwargs["base_ortonormal"]
-        )
+
+        if _filter_triangle(triangle) is True:
+            vertice_x.triangles.append(triangle)
+            vertice_y.triangles.append(triangle)
+            vertice_z.triangles.append(triangle)
+
+            triangle.normal = find_normal_triangle(triangle.vertices_coord_vista)
+            triangle.baricentro = find_baricentro_triangulo(
+                triangle.vertices_coord_vista,
+                kwargs["config"],
+                kwargs["base_ortonormal"],
+            )
+            good_triangles.append(triangle)
+
+    malha3d.triangles = good_triangles
 
 
 def enrich_vertices(malha3d):
@@ -141,16 +168,17 @@ def enrich_vertices(malha3d):
         vertice.normal = find_normal_vertice(vertice)
 
 
-def find_pixels(triangle):
-    vertices = copy.deepcopy(triangle.vertices_coord_tela)
-    vertices.sort(key=lambda x: x[1])
+def _find_pixels(vertices_coord_tela, sort_vertices_coord_tela):
+
     # Lista com pares de coordenadas
     # Cada par representa o começo e o fim de um lateral do triangulo
     # No total são 3 pares de coordenadas
     coords_sides = []
-    for i in range(0, len(triangle.vertices_coord_tela) - 1):
-        coords_sides.append((vertices[i], vertices[i + 1]))
-    coords_sides.append((vertices[0], vertices[-1]))
+    for i in range(0, len(vertices_coord_tela) - 1):
+        coords_sides.append(
+            (sort_vertices_coord_tela[i], sort_vertices_coord_tela[i + 1])
+        )
+    coords_sides.append((sort_vertices_coord_tela[0], sort_vertices_coord_tela[-1]))
 
     # Encontra os pontos que foram as retas (lados) do triangulo
     coords_inside_sides = []
@@ -158,10 +186,40 @@ def find_pixels(triangle):
         coords_inside_sides.append(find_points(p0=point[0], p1=point[1]))
 
     return fill_poly(
-        points=triangle.vertices_coord_tela,
+        points=vertices_coord_tela,
         sides=coords_sides,
         coords=coords_inside_sides,
     )
+
+
+def _update_zbuffer_malha(malha, point):
+    x, y = point.pixel
+    if malha.matriz[x][y].profundidade > point.p_original[2]:
+        pass
+
+
+def enrich_points(malha3d, zbuffer_malha):
+    for triangle in malha3d.triangles:
+        vertices_coord_tela = triangle.vertices_coord_tela
+        sort_vertices_coord_tela = copy.deepcopy(vertices_coord_tela)
+        sort_vertices_coord_tela.sort(key=lambda x: x[1])
+
+        all_pixels = _find_pixels(vertices_coord_tela, sort_vertices_coord_tela)
+
+        filter_pixels = []
+        for pixel in all_pixels:
+            result = find_baricentro_ponto(pixel, *sort_vertices_coord_tela)
+            if result is False:
+                continue
+            else:
+                p_original = find_p_original(result, triangle.vertices_coord_vista)
+                point = Point(
+                    pixel=pixel, coord_baricentrica=result, coord_original=p_original
+                )
+                filter_pixels.append(point)
+                _update_zbuffer_malha(zbuffer_malha, point)
+
+        triangle.inside_points = filter_pixels
 
 
 def draw(img, point):
