@@ -57,8 +57,10 @@ def coord_vista(P, config, base_ortonormal):
 
 def coordenadas_tela(coordenadas_vista, config, res_x, res_y):
     coordenadas_normalizadas = [
-        (config.get("d") * coordenadas_vista[0]) / (res_x * coordenadas_vista[2]),
-        (config.get("d") * coordenadas_vista[1]) / (res_y * coordenadas_vista[2]),
+        (config.get("d") / config.get("hx"))
+        * (coordenadas_vista[0] / coordenadas_vista[2]),
+        (config.get("d") / config.get("hy"))
+        * (coordenadas_vista[1] / coordenadas_vista[2]),
     ]
 
     const_i = ((coordenadas_normalizadas[0] + 1) / 2) * res_x
