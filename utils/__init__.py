@@ -15,6 +15,8 @@ from utils.math_ops import (
     coordenadas_tela,
     find_baricentro_ponto,
     find_baricentro_triangulo,
+    find_cor,
+    find_normal_ponto,
     find_normal_triangle,
     find_normal_vertice,
     find_p_original,
@@ -200,15 +202,29 @@ def _find_pixels(vertices_coord_tela, sort_vertices_coord_tela):
     )
 
 
-def _update_zbuffer_malha(malha, point):
-    x, y = point.pixel
-    element_in_malha = malha.matriz[x][y]
-    if element_in_malha.profundidade > point.p_original[2]:
-        element_in_malha.profundidade = point.p_original[2]
-        element_in_malha.ponto = point
+def _update_zbuffer_malha(element_in_malha, ponto, vertices_triangle, config):
+    if element_in_malha.profundidade > ponto.p_original[2]:
+        ponto.normal = find_normal_ponto(
+            ponto.coord_baricentrica,
+            [
+                vertices_triangle[0].normal,
+                vertices_triangle[1].normal,
+                vertices_triangle[2].normal,
+            ],
+        )
+        element_in_malha.profundidade = ponto.p_original[2]
+        element_in_malha.cor = find_cor(
+            ponto,
+            config,
+        )
+        element_in_malha.ponto = ponto
+
+    return element_in_malha
 
 
-def enrich_points(malha3d, zbuffer_malha):
+def enrich_points(malha3d, zbuffer_malha, config):
+    res_x, res_y = config.get("RES_X"), config.get("RES_Y")
+
     for triangle in malha3d.triangles:
         vertices_coord_tela = triangle.vertices_coord_tela
         sort_vertices_coord_tela = copy.deepcopy(vertices_coord_tela)
@@ -216,21 +232,36 @@ def enrich_points(malha3d, zbuffer_malha):
 
         all_pixels = _find_pixels(vertices_coord_tela, sort_vertices_coord_tela)
 
-        filter_pixels = []
         for pixel in all_pixels:
-            result = find_baricentro_ponto(pixel, *sort_vertices_coord_tela)
+            if (
+                (pixel[0] < 0)
+                or (pixel[0] > res_x)
+                or (pixel[1] < 0)
+                or (pixel[1] > res_y)
+            ):
+                continue
+
+            result = find_baricentro_ponto(pixel, *vertices_coord_tela)
             if result is False:
                 continue
             else:
                 p_original = find_p_original(result, triangle.vertices_coord_vista)
-                point = Point(
+                ponto = Point(
                     pixel=pixel, coord_baricentrica=result, coord_original=p_original
                 )
-                filter_pixels.append(point)
-                _update_zbuffer_malha(zbuffer_malha, point)
+                element_in_malha = zbuffer_malha.matriz[pixel[0]][pixel[1]]
+                zbuffer_malha.matriz[pixel[0]][pixel[1]] = _update_zbuffer_malha(
+                    element_in_malha,
+                    ponto,
+                    [
+                        malha3d.vertices[triangle.index_x],
+                        malha3d.vertices[triangle.index_y],
+                        malha3d.vertices[triangle.index_z],
+                    ],
+                    config,
+                )
 
-        triangle.inside_points = filter_pixels
 
-
-def draw(img, point):
-    cv2.circle(img, point, 0, (255, 255, 255), -1)
+def draw(img, pos, cor):
+    cor_bgr = (cor[2], cor[1], cor[0])
+    cv2.circle(img, pos, 0, cor_bgr, -1)
