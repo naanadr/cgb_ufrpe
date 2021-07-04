@@ -98,6 +98,13 @@ def find_normal_vertice(vertice):
     return _normalizar(np.sum(norm_triangles, axis=0))
 
 
+def find_normal_ponto(coord_baricentrica, norm_vertices):
+    multi = [
+        np.dot(coord_baricentrica[i], vert) for i, vert in enumerate(norm_vertices)
+    ]
+    return _normalizar(np.sum(multi, axis=0))
+
+
 def find_baricentro_triangulo(vertices, config, base_ortonormal):
     vertice_a, vertice_b, vertice_c = vertices
     return [sum(group) / 3 for group in zip(vertice_a, vertice_b, vertice_c)]
